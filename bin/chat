@@ -73,6 +73,12 @@ case "${1:-}" in -h|--help|help) ;; *)
 # Default --from from .chatrc; require --to (pre-filled from IDENTITY_NAME).
 # Reads/writes the caller's `from` and `to` locals via dynamic scoping.
 _resolve_from_to() {
+    # A message to anyone but the identity is the identity speaking. Without
+    # this its own `chat send --to <person>` took the operator default below,
+    # so the message was logged as the operator's and no bridge delivered it.
+    if [[ -z "$from" && -n "${IDENTITY_NAME:-}" && -n "$to" && "$to" != "$IDENTITY_NAME" ]]; then
+        from="$IDENTITY_NAME"
+    fi
     if [[ -z "$from" ]]; then
         from=$(_chatrc_get "default_send_from")
         if [[ -z "$from" ]]; then
