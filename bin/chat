@@ -435,6 +435,7 @@ _chat_is_text_file() {
 #   slack-U07AB-C09XYZ-1722400000.123456  ->  slack:U07AB
 #   slack-U07AB-D09XYZ                    ->  slack:U07AB
 #   telegram-8525624593-8525624593        ->  telegram:8525624593
+#   discord-111222333-444555666           ->  discord:111222333
 #   pwa-andy                              ->  pwa:andy
 #   Andy                                  ->  Andy
 # The same rule lives in jq below (_PERSON_KEY_JQ) so the index filter can
@@ -446,10 +447,14 @@ _chat_is_text_file() {
 _PERSON_KEY_JQ='def person_key:
     if test("^slack-[A-Za-z0-9]+-[A-Za-z0-9]+(-[0-9.]+)?$") then "slack:" + (split("-")[1])
     elif test("^telegram-[0-9]+-[0-9]+$") then "telegram:" + (split("-")[1])
+    elif test("^discord-[0-9]+-[0-9]+$") then "discord:" + (split("-")[1])
+    elif test("^discord-user-[0-9]+$") then "discord:" + (split("-")[2])
     elif test("^pwa-.") then "pwa:" + .[4:]
     else . end;
   def thread_key:
     if test("^slack-[A-Za-z0-9]+-[A-Za-z0-9]+-[0-9.]+$") then "slack-thread:" + (split("-")[2:] | join("-"))
+    elif test("^discord-[0-9]+-[0-9]+$") then "discord-thread:" + (split("-")[2])
+    elif test("^discord-channel-[0-9]+$") then "discord-thread:" + (split("-")[2])
     else "" end;'
 
 _person_key() {
